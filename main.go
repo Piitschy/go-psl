@@ -86,14 +86,29 @@ func validate(input string) error {
 	return nil
 }
 
+type Domain struct {
+	Input     string
+	Tld       string
+	Sld       string
+	Domain    string
+	Subdomain string
+	Listed    bool
+}
+
+// Parse domain.
 func Parse(input string) (string, error) {
 	return "", nil
 }
 
+// Get domain.
 func Get(domain string) (string, error) {
-	return "", nil
+	if domain == "" {
+		return "", errors.New("Empty domain.")
+	}
+	return Parse(domain)
 }
 
+// Check whether domain belongs to a known public suffix.
 func IsValid(domain string) bool {
-	return false
+	parsed := Parse(domain)
 }
