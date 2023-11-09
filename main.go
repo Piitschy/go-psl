@@ -110,5 +110,9 @@ func Get(domain string) (string, error) {
 
 // Check whether domain belongs to a known public suffix.
 func IsValid(domain string) bool {
-	parsed := Parse(domain)
+	parsed, err := Parse(domain)
+	if err != nil {
+		return false
+	}
+	return parsed != ""
 }
