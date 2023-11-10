@@ -6,6 +6,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"golang.org/x/net/idna"
 )
 
 var DomainTooShort = errors.New("Domain name too short.")
@@ -17,21 +19,21 @@ var LabelTooShort = errors.New("Domain name label should be at least 1 character
 var LabelInvalidChar = errors.New("Domain name label can only contain alphanumeric characters or dashes.")
 
 type Rule struct {
-	rule       string
-	suffix     string
-	punySuffix int
-	wildcard   bool
-	exception  bool
+	Rule       string
+	Suffix     string
+	PunySuffix string
+	Wildcard   bool
+	Exception  bool
 }
 
 func parseRule(rule string) *Rule {
 	re := regexp.MustCompile(`^(\*\.|\!)`)
 	return &Rule{
-		rule:       rule,
-		suffix:     re.ReplaceAllString(rule, ""),
-		punySuffix: -1,
-		wildcard:   strings.HasPrefix(rule, "*"),
-		exception:  strings.HasPrefix(rule, "!"),
+		Rule:       rule,
+		Suffix:     re.ReplaceAllString(rule, ""),
+		PunySuffix: "",
+		Wildcard:   strings.HasPrefix(rule, "*"),
+		Exception:  strings.HasPrefix(rule, "!"),
 	}
 }
 
@@ -55,7 +57,34 @@ func rules() []*Rule {
 	return ruleList
 }
 
-func findRule() {}
+func endsWith(s, suffix string) bool {
+	return len(s) >= len(suffix) && s[len(s)-len(suffix):] == suffix
+}
+
+func findRule(domain string) *Rule {
+	punyDomain, err := idna.ToASCII(domain)
+	if err != nil {
+		panic(err)
+	}
+	var matchedRule *Rule
+	for _, rule := range rules() {
+		if rule.PunySuffix == "" {
+			punySuffix, err := idna.ToASCII(rule.Suffix)
+			if err != nil {
+				continue
+			}
+			rule.PunySuffix = punySuffix
+
+		}
+		if !endsWith(punyDomain, "."+rule.PunySuffix) && punyDomain != rule.PunySuffix {
+			continue
+		}
+		matchedRule = rule
+		break
+	}
+	return matchedRule
+
+}
 
 func validate(input string) error {
 	ascii := strings.ToLower(input)
@@ -95,9 +124,63 @@ type Domain struct {
 	Listed    bool
 }
 
+func (d *Domain) handlePunycode() error {
+	if !strings.Contains(d.Input, "xn--") {
+		return nil
+	}
+	if d.Domain == "" {
+		d.Domain, _ = idna.ToASCII(d.Domain)
+	}
+	if d.Subdomain == "" {
+		d.Subdomain, _ = idna.ToASCII(d.Subdomain)
+	}
+	return nil
+}
+
 // Parse domain.
-func Parse(input string) (string, error) {
-	return "", nil
+func Parse(input string) (*Domain, error) {
+	domain := strings.ToLower(input)
+	if strings.HasSuffix(domain, ".") {
+		domain = domain[:len(domain)-1]
+	}
+
+	parsed := &Domain{
+		Input:     input,
+		Tld:       "",
+		Sld:       "",
+		Domain:    "",
+		Subdomain: "",
+		Listed:    false,
+	}
+
+	if err := validate(domain); err != nil {
+		return parsed, err
+	}
+
+	domainParts := strings.Split(domain, ".")
+	if domainParts[len(domainParts)-1] == "local" {
+		return parsed, nil // assuming 'parsed' is a variable defined in your function that you want to return
+	}
+
+	rule := findRule(domain)
+	if rule == nil {
+		if len(domainParts) == 1 {
+			parsed.Domain = domain
+			return parsed, nil
+		}
+		parsed.Tld = domainParts[len(domainParts)-1]
+		parsed.Sld = domainParts[len(domainParts)-2]
+		parsed.Domain = strings.Join([]string{parsed.Sld, parsed.Tld}, ".")
+		if len(domainParts) > 2 {
+			parsed.Subdomain = strings.Join(domainParts[:len(domainParts)-2], ".")
+		}
+		parsed.handlePunycode()
+		return parsed, nil
+	}
+
+	parsed.Listed = true
+	tldParts := strings.Split(rule.Suffix, ".")
+	//TODO: private parts line 218
 }
 
 // Get domain.
