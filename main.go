@@ -180,7 +180,41 @@ func Parse(input string) (*Domain, error) {
 
 	parsed.Listed = true
 	tldParts := strings.Split(rule.Suffix, ".")
-	//TODO: private parts line 218
+	privateParts := domainParts[:len(domainParts)-len(tldParts)]
+
+	var x string
+	if rule.Exception {
+		x, tldParts = tldParts[0], tldParts[1:]
+		privateParts = append(privateParts, x)
+	}
+
+	parsed.Tld = strings.Join(tldParts, ".")
+
+	if len(privateParts) == 0 {
+		parsed.handlePunycode()
+		return parsed, nil
+	}
+
+	if rule.Wildcard {
+		x, privateParts = privateParts[len(privateParts)-1], privateParts[:len(privateParts)-1]
+		tldParts = append([]string{x}, tldParts...)
+		parsed.Tld = strings.Join(tldParts, ".")
+	}
+
+	if len(privateParts) == 0 {
+		parsed.handlePunycode()
+		return parsed, nil
+	}
+
+	parsed.Sld, privateParts = privateParts[len(privateParts)-1], privateParts[:len(privateParts)-1]
+	parsed.Domain = strings.Join([]string{parsed.Sld, parsed.Tld}, ".")
+
+	if len(privateParts) > 0 {
+		parsed.Subdomain = strings.Join(privateParts, ".")
+	}
+
+	parsed.handlePunycode()
+	return parsed, nil
 }
 
 // Get domain.
@@ -188,7 +222,8 @@ func Get(domain string) (string, error) {
 	if domain == "" {
 		return "", errors.New("Empty domain.")
 	}
-	return Parse(domain)
+	parsed, err := Parse(domain)
+	return parsed.Domain, err
 }
 
 // Check whether domain belongs to a known public suffix.
@@ -197,5 +232,5 @@ func IsValid(domain string) bool {
 	if err != nil {
 		return false
 	}
-	return parsed != ""
+	return parsed.Domain != ""
 }
