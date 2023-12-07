@@ -1,4 +1,4 @@
-module github.com/Piitschy/go-psl
+module github.com/Piitschy/psl
 
 go 1.21.3
 
