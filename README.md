@@ -2,7 +2,7 @@
 
 # psl (Public Suffix List)
 
-This is a Go port from [lupomontero/psl](https://github.com/lupomontero/psl).
+This is a Go port of [lupomontero/psl](https://github.com/lupomontero/psl).
 
 ## What is the Public Suffix List?
 
