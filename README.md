@@ -1,8 +1,8 @@
-Here's an edited version of the README for your `psl` project, now rewritten in Go:
 
----
 
 # psl (Public Suffix List)
+
+This is a Go port from [lupomontero/psl](https://github.com/lupomontero/psl).
 
 ## What is the Public Suffix List?
 
@@ -17,7 +17,7 @@ Source: http://publicsuffix.org
 ### Go
 
 ```sh
-go get github.com/[your-github-username]/psl
+go get github.com/Piitschy/psl
 ```
 
 ## API
@@ -38,7 +38,7 @@ package main
 
 import (
     "fmt"
-    "github.com/[your-github-username]/psl"
+    "github.com/Piitschy/psl"
 )
 
 func main() {
@@ -83,13 +83,8 @@ Feel free to fork if you see possible improvements!
 ## Acknowledgements
 
 * Mozilla Foundation's [Public Suffix List](https://publicsuffix.org/)
-* Thanks to Rob Stradling of [Comodo](https://www.comodo.com/) for providing test data.
-* Inspired by [weppos/publicsuffix-ruby](https://github.com/weppos/publicsuffix-ruby)
+* Inspired by [lupomontero/psl](https://github.com/lupomontero/psl)
 
 ## License
 
 [MIT License](LICENSE.md)
-
----
-
-Remember to replace `[your-github-username]` with your actual GitHub username, and adjust any paths or URLs as necessary for your project.
