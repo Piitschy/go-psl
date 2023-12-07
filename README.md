@@ -4,6 +4,13 @@
 
 This is a Go port of [lupomontero/psl](https://github.com/lupomontero/psl).
 
+`psl` is a ~~`JavaScript`~~ `Go` domain name parser based on the
+[Public Suffix List](https://publicsuffix.org/).
+
+This implementation is tested against the
+[test data hosted by Mozilla](http://mxr.mozilla.org/mozilla-central/source/netwerk/test/unit/data/test_psl.txt?raw=1)
+and kindly provided by [Comodo](https://www.comodo.com/).
+
 ## What is the Public Suffix List?
 
 The Public Suffix List is a cross-vendor initiative to provide an accurate list of domain name suffixes.
