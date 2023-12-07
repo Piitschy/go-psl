@@ -32,7 +32,7 @@ func TestParseTooLong(t *testing.T) {
 	if err == nil {
 		t.Fatal("should give a too-long error but gave nil")
 	}
-	if err != DomainTooLong {
+	if err != ErrDomainTooLong {
 		t.Fatalf("should give a too-long error but gave:\n %v", err)
 	}
 }
