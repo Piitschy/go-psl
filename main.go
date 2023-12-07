@@ -154,15 +154,14 @@ func Parse(input string) (*Domain, error) {
 
 	rule := findRule(domain)
 	if rule == nil {
-		if len(domainParts) == 1 {
-			parsed.Domain = domain
+		if len(domainParts) < 2 {
 			return parsed, nil
 		}
-		parsed.Tld = domainParts[len(domainParts)-1]
-		parsed.Sld = domainParts[len(domainParts)-2]
+		parsed.Tld, domainParts = domainParts[len(domainParts)-1], domainParts[:len(domainParts)-1]
+		parsed.Sld, domainParts = domainParts[len(domainParts)-1], domainParts[:len(domainParts)-1]
 		parsed.Domain = strings.Join([]string{parsed.Sld, parsed.Tld}, ".")
-		if len(domainParts) > 2 {
-			parsed.Subdomain = strings.Join(domainParts[:len(domainParts)-2], ".")
+		if len(domainParts) > 0 {
+			parsed.Subdomain, domainParts = domainParts[len(domainParts)-1], domainParts[:len(domainParts)-1]
 		}
 		parsed.handlePunycode()
 		return parsed, nil
