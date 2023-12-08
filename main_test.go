@@ -1,7 +1,6 @@
 package psl
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -79,9 +78,4 @@ func TestGet(t *testing.T) {
 			}
 		})
 	}
-}
-
-func Test(t *testing.T) {
-	domain, _ := Get("uk.com")
-	fmt.Println("domain", domain)
 }
