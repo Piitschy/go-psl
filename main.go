@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Piitschy/psl/data"
+	"github.com/Piitschy/psl/utils"
 	"golang.org/x/net/idna"
 )
 
@@ -57,7 +58,8 @@ func findRule(domain string) *Rule {
 		panic(err)
 	}
 	var matchedRule *Rule
-	for _, rule := range rules() {
+	rules := rules()
+	for _, rule := range rules {
 		if rule.PunySuffix == "" {
 			punySuffix, err := idna.ToASCII(rule.Suffix)
 			if err != nil {
@@ -70,14 +72,16 @@ func findRule(domain string) *Rule {
 			continue
 		}
 		matchedRule = rule
-		break
 	}
 	return matchedRule
 
 }
 
 func validate(input string) error {
-	ascii := strings.ToLower(input)
+	ascii, err := idna.ToASCII(strings.ToLower(input))
+	if err != nil {
+		return ErrLabelInvalidChar
+	}
 	if len(ascii) < 1 {
 		return ErrDomainTooShort
 	}
@@ -114,17 +118,17 @@ type Domain struct {
 	Listed    bool
 }
 
-func (d *Domain) handlePunycode() error {
-	if !strings.Contains(d.Input, "xn--") {
-		return nil
+func (d *Domain) handlePunycode() *Domain {
+	if !strings.Contains(strings.ToLower(d.Input), "xn--") {
+		return d
 	}
-	if d.Domain == "" {
+	if d.Domain != "" {
 		d.Domain, _ = idna.ToASCII(d.Domain)
 	}
-	if d.Subdomain == "" {
+	if d.Subdomain != "" {
 		d.Subdomain, _ = idna.ToASCII(d.Subdomain)
 	}
-	return nil
+	return d
 }
 
 // Parse domain.
@@ -154,18 +158,16 @@ func Parse(input string) (*Domain, error) {
 
 	rule := findRule(domain)
 	if rule == nil {
-		if len(domainParts) == 1 {
-			parsed.Domain = domain
+		if len(domainParts) < 2 {
 			return parsed, nil
 		}
-		parsed.Tld = domainParts[len(domainParts)-1]
-		parsed.Sld = domainParts[len(domainParts)-2]
+		parsed.Tld = utils.Popp(&domainParts)
+		parsed.Sld = utils.Popp(&domainParts)
 		parsed.Domain = strings.Join([]string{parsed.Sld, parsed.Tld}, ".")
-		if len(domainParts) > 2 {
-			parsed.Subdomain = strings.Join(domainParts[:len(domainParts)-2], ".")
+		if len(domainParts) > 0 {
+			parsed.Subdomain = utils.Popp(&domainParts)
 		}
-		parsed.handlePunycode()
-		return parsed, nil
+		return parsed.handlePunycode(), nil
 	}
 
 	parsed.Listed = true
@@ -181,8 +183,7 @@ func Parse(input string) (*Domain, error) {
 	parsed.Tld = strings.Join(tldParts, ".")
 
 	if len(privateParts) == 0 {
-		parsed.handlePunycode()
-		return parsed, nil
+		return parsed.handlePunycode(), nil
 	}
 
 	if rule.Wildcard {
@@ -192,25 +193,23 @@ func Parse(input string) (*Domain, error) {
 	}
 
 	if len(privateParts) == 0 {
-		parsed.handlePunycode()
-		return parsed, nil
+		return parsed.handlePunycode(), nil
 	}
 
-	parsed.Sld, privateParts = privateParts[len(privateParts)-1], privateParts[:len(privateParts)-1]
+	parsed.Sld = utils.Popp(&privateParts)
 	parsed.Domain = strings.Join([]string{parsed.Sld, parsed.Tld}, ".")
 
 	if len(privateParts) > 0 {
 		parsed.Subdomain = strings.Join(privateParts, ".")
 	}
 
-	parsed.handlePunycode()
-	return parsed, nil
+	return parsed.handlePunycode(), nil
 }
 
 // Get domain.
 func Get(domain string) (string, error) {
 	if domain == "" {
-		return "", errors.New("Empty domain.")
+		return "", errors.New("empty domain")
 	}
 	parsed, err := Parse(domain)
 	return parsed.Domain, err
