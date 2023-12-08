@@ -1,6 +1,7 @@
 package psl
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -77,5 +78,24 @@ func TestGet(t *testing.T) {
 				t.Errorf("psl.Get(%s) = %s; want %s", tc.domain, result, tc.expected)
 			}
 		})
+	}
+}
+
+func TestValidate(t *testing.T) {
+	testCases := []struct {
+		domain  string
+		wantErr error
+	}{
+		{"example.com", nil},
+		{"", ErrDomainTooShort},
+		{"a" + strings.Repeat("a", 256) + ".com", ErrDomainTooLong},
+		// Add more test cases...
+	}
+
+	for _, tc := range testCases {
+		err := validate(tc.domain)
+		if err != tc.wantErr {
+			t.Errorf("validate(%q) = %v, want %v", tc.domain, err, tc.wantErr)
+		}
 	}
 }
