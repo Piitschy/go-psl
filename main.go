@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Piitschy/psl/data"
+	"github.com/Piitschy/psl/utils"
 	"golang.org/x/net/idna"
 )
 
@@ -114,9 +115,9 @@ type Domain struct {
 	Listed    bool
 }
 
-func (d *Domain) handlePunycode() error {
+func (d *Domain) handlePunycode() *Domain {
 	if !strings.Contains(d.Input, "xn--") {
-		return nil
+		return d
 	}
 	if d.Domain == "" {
 		d.Domain, _ = idna.ToASCII(d.Domain)
@@ -124,7 +125,7 @@ func (d *Domain) handlePunycode() error {
 	if d.Subdomain == "" {
 		d.Subdomain, _ = idna.ToASCII(d.Subdomain)
 	}
-	return nil
+	return d
 }
 
 // Parse domain.
@@ -157,14 +158,13 @@ func Parse(input string) (*Domain, error) {
 		if len(domainParts) < 2 {
 			return parsed, nil
 		}
-		parsed.Tld, domainParts = domainParts[len(domainParts)-1], domainParts[:len(domainParts)-1]
-		parsed.Sld, domainParts = domainParts[len(domainParts)-1], domainParts[:len(domainParts)-1]
+		parsed.Tld = utils.Popp(&domainParts)
+		parsed.Sld = utils.Popp(&domainParts)
 		parsed.Domain = strings.Join([]string{parsed.Sld, parsed.Tld}, ".")
 		if len(domainParts) > 0 {
-			parsed.Subdomain, domainParts = domainParts[len(domainParts)-1], domainParts[:len(domainParts)-1]
+			parsed.Subdomain = utils.Popp(&domainParts)
 		}
-		parsed.handlePunycode()
-		return parsed, nil
+		return parsed.handlePunycode(), nil
 	}
 
 	parsed.Listed = true
@@ -180,8 +180,7 @@ func Parse(input string) (*Domain, error) {
 	parsed.Tld = strings.Join(tldParts, ".")
 
 	if len(privateParts) == 0 {
-		parsed.handlePunycode()
-		return parsed, nil
+		return parsed.handlePunycode(), nil
 	}
 
 	if rule.Wildcard {
@@ -191,25 +190,23 @@ func Parse(input string) (*Domain, error) {
 	}
 
 	if len(privateParts) == 0 {
-		parsed.handlePunycode()
-		return parsed, nil
+		return parsed.handlePunycode(), nil
 	}
 
-	parsed.Sld, privateParts = privateParts[len(privateParts)-1], privateParts[:len(privateParts)-1]
+	parsed.Sld = utils.Popp(&privateParts)
 	parsed.Domain = strings.Join([]string{parsed.Sld, parsed.Tld}, ".")
 
 	if len(privateParts) > 0 {
 		parsed.Subdomain = strings.Join(privateParts, ".")
 	}
 
-	parsed.handlePunycode()
-	return parsed, nil
+	return parsed.handlePunycode(), nil
 }
 
 // Get domain.
 func Get(domain string) (string, error) {
 	if domain == "" {
-		return "", errors.New("Empty domain.")
+		return "", errors.New("empty domain")
 	}
 	parsed, err := Parse(domain)
 	return parsed.Domain, err
