@@ -1,6 +1,7 @@
 package psl
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -22,7 +23,7 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestParseTooLong(t *testing.T) {
+func TestParseErrTooLong(t *testing.T) {
 	var s string
 	for len(s) < 256 {
 		s += "x"
@@ -78,4 +79,9 @@ func TestGet(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test(t *testing.T) {
+	domain, _ := Get("uk.com")
+	fmt.Println("domain", domain)
 }

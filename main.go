@@ -58,7 +58,8 @@ func findRule(domain string) *Rule {
 		panic(err)
 	}
 	var matchedRule *Rule
-	for _, rule := range rules() {
+	rules := rules()
+	for _, rule := range rules {
 		if rule.PunySuffix == "" {
 			punySuffix, err := idna.ToASCII(rule.Suffix)
 			if err != nil {
@@ -71,14 +72,16 @@ func findRule(domain string) *Rule {
 			continue
 		}
 		matchedRule = rule
-		break
 	}
 	return matchedRule
 
 }
 
 func validate(input string) error {
-	ascii := strings.ToLower(input)
+	ascii, err := idna.ToASCII(strings.ToLower(input))
+	if err != nil {
+		return ErrLabelInvalidChar
+	}
 	if len(ascii) < 1 {
 		return ErrDomainTooShort
 	}
@@ -116,13 +119,13 @@ type Domain struct {
 }
 
 func (d *Domain) handlePunycode() *Domain {
-	if !strings.Contains(d.Input, "xn--") {
+	if !strings.Contains(strings.ToLower(d.Input), "xn--") {
 		return d
 	}
-	if d.Domain == "" {
+	if d.Domain != "" {
 		d.Domain, _ = idna.ToASCII(d.Domain)
 	}
-	if d.Subdomain == "" {
+	if d.Subdomain != "" {
 		d.Subdomain, _ = idna.ToASCII(d.Subdomain)
 	}
 	return d
