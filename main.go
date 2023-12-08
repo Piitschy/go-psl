@@ -111,8 +111,8 @@ func validate(input string) error {
 
 type Domain struct {
 	Input     string
-	Tld       string
-	Sld       string
+	TLD       string
+	SLD       string
 	Domain    string
 	Subdomain string
 	Listed    bool
@@ -140,8 +140,8 @@ func Parse(input string) (*Domain, error) {
 
 	parsed := &Domain{
 		Input:     input,
-		Tld:       "",
-		Sld:       "",
+		TLD:       "",
+		SLD:       "",
 		Domain:    "",
 		Subdomain: "",
 		Listed:    false,
@@ -161,9 +161,9 @@ func Parse(input string) (*Domain, error) {
 		if len(domainParts) < 2 {
 			return parsed, nil
 		}
-		parsed.Tld = utils.Popp(&domainParts)
-		parsed.Sld = utils.Popp(&domainParts)
-		parsed.Domain = strings.Join([]string{parsed.Sld, parsed.Tld}, ".")
+		parsed.TLD = utils.Popp(&domainParts)
+		parsed.SLD = utils.Popp(&domainParts)
+		parsed.Domain = strings.Join([]string{parsed.SLD, parsed.TLD}, ".")
 		if len(domainParts) > 0 {
 			parsed.Subdomain = utils.Popp(&domainParts)
 		}
@@ -180,7 +180,7 @@ func Parse(input string) (*Domain, error) {
 		privateParts = append(privateParts, x)
 	}
 
-	parsed.Tld = strings.Join(tldParts, ".")
+	parsed.TLD = strings.Join(tldParts, ".")
 
 	if len(privateParts) == 0 {
 		return parsed.handlePunycode(), nil
@@ -189,15 +189,15 @@ func Parse(input string) (*Domain, error) {
 	if rule.Wildcard {
 		x, privateParts = privateParts[len(privateParts)-1], privateParts[:len(privateParts)-1]
 		tldParts = append([]string{x}, tldParts...)
-		parsed.Tld = strings.Join(tldParts, ".")
+		parsed.TLD = strings.Join(tldParts, ".")
 	}
 
 	if len(privateParts) == 0 {
 		return parsed.handlePunycode(), nil
 	}
 
-	parsed.Sld = utils.Popp(&privateParts)
-	parsed.Domain = strings.Join([]string{parsed.Sld, parsed.Tld}, ".")
+	parsed.SLD = utils.Popp(&privateParts)
+	parsed.Domain = strings.Join([]string{parsed.SLD, parsed.TLD}, ".")
 
 	if len(privateParts) > 0 {
 		parsed.Subdomain = strings.Join(privateParts, ".")

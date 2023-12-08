@@ -33,9 +33,9 @@ go get github.com/Piitschy/psl
 
 Parse a domain based on the Public Suffix List. Returns a `struct` with the following properties:
 
-* `Tld`: Top level domain (the public suffix).
-* `Sld`: Second level domain (the first private part of the domain name).
-* `Domain`: The combination of `Sld` and `Tld`.
+* `TLD`: Top level domain (the public suffix).
+* `SLD`: Second level domain (the first private part of the domain name).
+* `Domain`: The combination of `SLD` and `TLD`.
 * `Subdomain`: Any optional parts left of the domain.
 
 #### Example:
@@ -50,8 +50,8 @@ import (
 
 func main() {
     parsed, _ := psl.Parse("www.google.com")
-    fmt.Println(parsed.Tld) // 'com'
-    fmt.Println(parsed.Sld) // 'google'
+    fmt.Println(parsed.TLD) // 'com'
+    fmt.Println(parsed.SLD) // 'google'
     fmt.Println(parsed.Domain) // 'google.com'
     fmt.Println(parsed.Subdomain) // 'www'
 }
@@ -59,7 +59,7 @@ func main() {
 
 ### `psl.Get(domain string)`
 
-Get the domain name, `Sld` + `Tld`. Returns an empty string if not valid.
+Get the domain name, `SLD` + `TLD`. Returns an empty string if not valid.
 
 #### Example:
 
