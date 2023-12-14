@@ -134,6 +134,9 @@ func (d *Domain) handlePunycode() *Domain {
 // Parse domain.
 func Parse(input string) (*Domain, error) {
 	domain := strings.ToLower(input)
+	if strings.HasPrefix(domain, "http") {
+		domain = strings.Split(domain, "/")[2]
+	}
 	if strings.HasSuffix(domain, ".") {
 		domain = domain[:len(domain)-1]
 	}
