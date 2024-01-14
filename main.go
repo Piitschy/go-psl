@@ -55,7 +55,7 @@ func endsWith(s, suffix string) bool {
 func findRule(domain string) *Rule {
 	punyDomain, err := idna.ToASCII(domain)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 	var matchedRule *Rule
 	rules := rules()
@@ -74,7 +74,6 @@ func findRule(domain string) *Rule {
 		matchedRule = rule
 	}
 	return matchedRule
-
 }
 
 func validate(input string) error {
