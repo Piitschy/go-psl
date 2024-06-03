@@ -2,12 +2,12 @@
 
 # psl (Public Suffix List)
 
-This is a Go port of [lupomontero/psl](https://github.com/lupomontero/psl).
-
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Piitschy/psl)
 ![GitHub Release](https://img.shields.io/github/v/release/Piitschy/psl)
 ![GitHub Release Date](https://img.shields.io/github/release-date/Piitschy/psl)
 ![GitHub branch check runs](https://img.shields.io/github/check-runs/Piitschy/psl/main)
+
+This is a Go port of [lupomontero/psl](https://github.com/lupomontero/psl).
 
 `psl` is a ~~`JavaScript`~~ `Go` domain name parser based on the
 [Public Suffix List](https://publicsuffix.org/).
