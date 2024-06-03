@@ -20,6 +20,7 @@ var (
 	ErrLabelInvalidChar    = errors.New("Domain name label can only contain alphanumeric characters or dashes")
 )
 
+// Rule struct represents a public suffix rule.
 type Rule struct {
 	Rule       string
 	Suffix     string
@@ -108,6 +109,13 @@ func validate(input string) error {
 	return nil
 }
 
+// Domain struct represents a parsed domain.
+// Input is the original domain string.
+// TLD is the top-level domain.
+// SLD is the second-level domain.
+// Domain is the domain name.
+// Subdomain is the subdomain.
+// Listed is true if the domain belongs to a known public suffix.
 type Domain struct {
 	Input     string
 	TLD       string
@@ -130,7 +138,8 @@ func (d *Domain) handlePunycode() *Domain {
 	return d
 }
 
-// Parse domain.
+// Parse domain string.
+// Returns a Domain struct and an error.
 func Parse(input string) (*Domain, error) {
 	domain := strings.ToLower(input)
 	if strings.HasPrefix(domain, "http") {
@@ -208,7 +217,9 @@ func Parse(input string) (*Domain, error) {
 	return parsed.handlePunycode(), nil
 }
 
-// Get domain.
+// Get domain name from a domain string.
+// Returns the domain (same like Domain.Domain) name and an error.
+// If the domain is not valid, the domain name will be empty and the error will be non-nil.
 func Get(domain string) (string, error) {
 	if domain == "" {
 		return "", errors.New("empty domain")
@@ -217,7 +228,8 @@ func Get(domain string) (string, error) {
 	return parsed.Domain, err
 }
 
-// Check whether domain belongs to a known public suffix.
+// Check if a domain is valid.
+// Returns true if the domain is valid, false otherwise.
 func IsValid(domain string) bool {
 	parsed, err := Parse(domain)
 	if err != nil {
