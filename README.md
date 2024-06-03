@@ -1,6 +1,6 @@
 
 
-# Daomain Parser in Go: psl (Public Suffix List)
+# Domain Parser in Go: psl (Public Suffix List)
 
 This is a Go port of [lupomontero/psl](https://github.com/lupomontero/psl).
 
