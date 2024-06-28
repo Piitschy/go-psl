@@ -2,7 +2,7 @@
 
 # Domain Parser in Go: psl (Public Suffix List)
 
-This is a Go port of [lupomontero/psl](https://github.com/lupomontero/psl).
+This is a Go port of [lupomontero/psl](https://github.com/lupomontero/psl) to get exact the same behavior on server and client side.
 
 `psl` is a ~~`JavaScript`~~ `Go` domain name parser based on the
 [Public Suffix List](https://publicsuffix.org/).
